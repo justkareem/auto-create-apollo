@@ -125,12 +125,12 @@ def get_token(email, domain):
             uids_from_apollo = []
 
             # Loop through email headers
-            for email in email_headers:
-                uid = email[10]  # 'uid' is at index 10
+            for sogo_email in email_headers:
+                uid = sogo_email[10]  # 'uid' is at index 10
 
                 # Check if any sender email matches 'support@tryapollo.io'
-                if any(e.get("email") == "support@tryapollo.io" for e in email[4]) and any(
-                        e.get("email") == domain for e in email[0]):
+                if any(e.get("email") == "support@tryapollo.io" for e in sogo_email[4]) and any(
+                        e.get("email") == email.lower() for e in sogo_email[0]):
                     uids_from_apollo.append(uid)
                 for uid in uids_from_apollo:
                     response = requests.get(
@@ -243,8 +243,6 @@ def main():
         if not available_domains:
             print("All domains have reached the maximum account limit.")
             break
-        print(proxy)
-        input()
         domain = random.choice(available_domains)
         name, email = generate_email(used_emails, domain)
         used_emails.append(email)
