@@ -68,8 +68,8 @@ def create_account(email, proxy):
     }
     # Set up proxy for the request
     proxies = {
-        "http": proxy["proxy"],
-        "https": proxy["proxy"],
+        "http": proxy,
+        "https": proxy,
     }
 
     try:
@@ -155,6 +155,7 @@ def generate_csrf_token(length=32):
 def verify_account(proxy, token, name, email):
     csrf_token = generate_csrf_token()
 
+
     headers = {
         'accept': '*/*',
         'accept-language': 'en-US,en;q=0.9',
@@ -177,8 +178,8 @@ def verify_account(proxy, token, name, email):
     }
 
     proxies = {
-        "http": proxy["proxy"],
-        "https": proxy["proxy"]
+        "http": proxy,
+        "https": proxy
     }
 
     verification_token_url = f"https://app.apollo.io/api/v1/password_resets/{token}"
@@ -232,7 +233,7 @@ def generate_email(used_emails, domain):
 
 
 def main():
-    proxy_csv = pd.read_csv("proxy.csv")
+    proxy_csv = pd.read_csv("proxy.csv")["proxy"]
     domains = domain_csv["domain"]
     used_emails = []
     domain_usage = {domain: 0 for domain in domains}
@@ -242,7 +243,8 @@ def main():
         if not available_domains:
             print("All domains have reached the maximum account limit.")
             break
-
+        print(proxy)
+        input()
         domain = random.choice(available_domains)
         name, email = generate_email(used_emails, domain)
         used_emails.append(email)
@@ -251,12 +253,13 @@ def main():
 
         token = get_token(email, domain)
         csrf, cookies = verify_account(proxy, token, name, email)
+        proxy_ip, proxy_port = proxy.split('@')[-1].split(':')
         row = {
             "email": email,
             "team_id": team_id,
-            "proxy_ip": proxy["proxy_ip"],
-            "proxy_port": proxy["proxy_port"],
-            "proxy": proxy["proxy"],
+            "proxy_ip": proxy_ip,
+            "proxy_port": proxy_port,
+            "proxy": proxy,
             "cookies": cookies,
             "x-csrf-token": csrf
         }
