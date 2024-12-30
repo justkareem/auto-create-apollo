@@ -2,11 +2,12 @@ import csv
 import random
 import re
 import secrets
+from urllib.parse import parse_qs
+
 import pandas as pd
 import time
 import requests
 
-domain_csv = pd.read_csv("cookies_data.csv")
 file_headers = ["email", "team_id", "proxy_ip", "proxy_port", "proxy", "cookies", "x-csrf-token"]
 
 # CSV file name
@@ -88,12 +89,59 @@ def create_account(email, proxy):
 
 def get_token(email, domain):
     """Verifies an Apollo account via email verification request."""
-    data_row = domain_csv[domain_csv["domain"] == domain]
+    user_name = f"admin@{domain}"
+    url = "https://mail.hyronleadmasters.com/SOGo/connect"
+
+    try:
+        headers = {
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "en-US,en;q=0.9",
+            "content-type": "application/json;charset=UTF-8",
+            "origin": "https://mail.hyronleadmasters.com",
+            "priority": "u=1, i",
+            "referer": "https://mail.hyronleadmasters.com/",
+            "sec-ch-ua": '"Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"Windows"',
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+        }
+
+        data = {
+            "userName": user_name,
+            "password": "BOBOtula2004$$",
+            "domain": None,
+            "rememberLogin": 0
+        }
+
+        def make_request():
+            return requests.post(url, headers=headers, json=data)
+
+        response = retry_request(make_request)
+
+        # Check if the response status code is 200
+        if response.status_code == 200:
+            # Extract cookies from the response headers
+            set_cookie_header = response.headers.get("set-cookie", "")
+
+            # Parse cookies
+            cookies = {k: v[0] for k, v in parse_qs(set_cookie_header.replace(';', '&')).items()}
+
+            # Extract CSRF token if present
+            csrf_token = cookies.get(" HttpOnly, XSRF-TOKEN", "")
+
+            # Combine cookies into a single string for storage
+            cookie_string = set_cookie_header
+    except Exception:
+        pass
+
     url = f"https://mail.hyronleadmasters.com/SOGo/so/admin@{domain}/Mail/0/folderINBOX/view"
     headers = {
         "accept": "application/json, text/plain, */*",
         "accept-language": "en-US,en;q=0.9",
-        "cookie": data_row["cookie"].item(),
+        "cookie": cookie_string,
         "content-type": "application/json;charset=UTF-8",
         "origin": "https://mail.hyronleadmasters.com",
         "priority": "u=1, i",
@@ -104,7 +152,7 @@ def get_token(email, domain):
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
-        "x-xsrf-token": data_row["csrf"].item()
+        "x-xsrf-token": csrf_token
     }
 
     data = {
@@ -235,44 +283,101 @@ def generate_email(used_emails, domain):
 
 def main():
     proxy_csv = pd.read_csv("proxy.csv")["proxy"]
-    domains = domain_csv["domain"]
+    domains = ["hyronagency.com", "hyronagency.one", "hyronleadboost.com", "hyronleadboost.one", "hyronleadcloud.com",
+               "hyronleadconnect.one", "hyronleadconsult.one", "hyronleadconsulting.one", "hyronleaddigital.com",
+               "hyronleaddigital.one", "hyronleadexperts.one", "hyronleadflow.one", "hyronleadgen.one",
+               "hyronleadgenius.com", "hyronleadgenius.one", "hyronleadgo.one", "hyronleadgroup.one",
+               "hyronleadgrow.one", "hyronleadgrowth.one", "hyronleadhub.com", "hyronleadhub.one", "hyronleadinfo.one",
+               "hyronleadlab.com", "hyronleadlab.one", "hyronleadmarket.com", "hyronleadmarket.one",
+               "hyronleadmarketing.one", "hyronleadmaster.com", "hyronleadmaster.one", "hyronleadmasters.com",
+               "hyronleadmasters.one", "hyronleadmedia.com", "hyronleadmedia.one", "hyronleadnet.com",
+               "hyronleadnet.one", "hyronleadnetwork.one", "hyronleadonline.com", "hyronleadonline.one",
+               "hyronleadpartner.com", "hyronleadpartner.one", "hyronleadpartners.com", "hyronleadpartners.one",
+               "hyronleadprime.com", "hyronleadprime.one", "hyronleadpro.com", "hyronleadpro.one", "hyronleadpros.com",
+               "hyronleadpros.one", "hyronleadreach.one", "hyronleadrise.one", "hyronleadrising.one", "hyronleads.one",
+               "hyronleadsagency.one", "hyronleadsboost.com", "hyronleadsboost.one", "hyronleadsclick.com",
+               "hyronleadsclick.one", "hyronleadscloud.one", "hyronleadsconnect.one", "hyronleadsconsult.one",
+               "hyronleadsconsulting.one", "hyronleadsdigital.com", "hyronleadsecret.one", "hyronleadservice.com",
+               "hyronleadservice.one", "hyronleadservices.one", "hyronleadsexpert.com", "hyronleadsexpert.one",
+               "hyronleadsflow.one", "hyronleadsgenius.com", "hyronleadsgenius.one", "hyronleadsgo.one",
+               "hyronleadsgroup.one", "hyronleadsgrow.one", "hyronleadsgrowth.one", "hyronleadshub.com",
+               "hyronleadshub.one", "hyronleadslab.one", "hyronleadsmarket.one", "hyronleadsmarketing.com",
+               "hyronleadsmarketing.one", "hyronleadsmaster.com", "hyronleadsmaster.one", "hyronleadsmasters.com",
+               "hyronleadsmasters.one", "hyronleadsmedia.com", "hyronleadsnet.com", "hyronleadsnet.one",
+               "hyronleadsnetwork.one", "hyronleadsolution.com", "hyronleadsolution.one", "hyronleadsolutions.one",
+               "hyronleadsonline.one", "hyronleadspartner.com", "hyronleadspartner.one", "hyronleadspartners.com",
+               "hyronleadspartners.one", "hyronleadspecialist.one", "hyronleadsprime.one", "hyronleadspro.com"]
     used_emails = ["Zael@hyronleadsagency.one", "Eason@hyronleadsolutions.one", "Gilberto@hyronleadsnet.com", "Charlie@hyronagency.one", "Greysen@hyronleadspro.com", "Howard@hyronleadsmarketing.one", "Primrose@hyronleadpros.one", "Josey@hyronleadspartner.com", "Anais@hyronleadnet.com", "Haziel@hyronleadboost.com", "Kaizer@hyronleadpros.com", "Khaza@hyronleadpartner.one", "Atlas@hyronleadsmarketing.com", "Levon@hyronleadnet.com", "Matheo@hyronleadsclick.com", "Mileena@hyronleads.one", "Carolyn@hyronleadservice.com", "Storm@hyronleaddigital.one", "Beaux@hyronleadsolution.com", "Craig@hyronleadconsulting.one", "Issac@hyronleadflow.one", "Jacobo@hyronleadspartners.one", "Nasir@hyronleadnetwork.one", "Karen@hyronleadsmarketing.one", "Amiyah@hyronleadspecialist.one", "Lesly@hyronleadgen.one", "Cy@hyronleadgen.one", "Trevon@hyronleaddigital.one", "Adira@hyronleadconnect.one", "Kanaan@hyronleadsmarketing.one", "Xaiden@hyronleadrise.one", "Shalom@hyronleadsgenius.com", "Eyden@hyronleadmaster.com", "Taryn@hyronleadsmarket.one", "Blakelyn@hyronleadmarketing.one", "Carolina@hyronleadsconsult.one", "Aliana@hyronleadsolutions.one", "Eithan@hyronleadmasters.one", "Denver@hyronleadhub.one", "Kashmere@hyronleadhub.one", "Jaycob@hyronleadprime.one", "Emmeline@hyronleadsmasters.com"]
     domain_usage = {domain: 0 for domain in domains}
     domain_usage["hyronleadsagency.one"] = 1
-    domain_usage["hyronleadsolutions.one"] = 2
+    domain_usage["hyronleadsolutions.one"] = 3
     domain_usage["hyronleadsnet.com"] = 1
     domain_usage["hyronagency.one"] = 1
     domain_usage["hyronleadspro.com"] = 1
     domain_usage["hyronleadsmarketing.one"] = 3
-    domain_usage["hyronleadpros.one"] = 1
-    domain_usage["hyronleadspartner.com"] = 1
-    domain_usage["hyronleadnet.com"] = 2
-    domain_usage["hyronleadboost.com"] = 1
-    domain_usage["hyronleadpros.com"] = 1
+    domain_usage["hyronleadpros.one"] = 3
+    domain_usage["hyronleadspartner.com"] = 2
+    domain_usage["hyronleadnet.com"] = 4
+    domain_usage["hyronleadboost.com"] = 2
+    domain_usage["hyronleadpros.com"] = 3
     domain_usage["hyronleadpartner.one"] = 1
-    domain_usage["hyronleadsmarketing.com"] = 1
-    domain_usage["hyronleadsclick.com"] = 1
+    domain_usage["hyronleadsmarketing.com"] = 2
+    domain_usage["hyronleadsclick.com"] = 2
     domain_usage["hyronleads.one"] = 1
     domain_usage["hyronleadservice.com"] = 1
-    domain_usage["hyronleaddigital.one"] = 2
+    domain_usage["hyronleaddigital.one"] = 3
     domain_usage["hyronleadsolution.com"] = 1
     domain_usage["hyronleadconsulting.one"] = 1
-    domain_usage["hyronleadflow.one"] = 1
+    domain_usage["hyronleadflow.one"] = 2
     domain_usage["hyronleadspartners.one"] = 1
     domain_usage["hyronleadnetwork.one"] = 1
     domain_usage["hyronleadspecialist.one"] = 1
-    domain_usage["hyronleadgen.one"] = 4
-    domain_usage["hyronleadconnect.one"] = 1
+    domain_usage["hyronleadgen.one"] = 5
+    domain_usage["hyronleadconnect.one"] = 3
     domain_usage["hyronleadrise.one"] = 1
     domain_usage["hyronleadsgenius.com"] = 2
     domain_usage["hyronleadmaster.com"] = 1
     domain_usage["hyronleadsmarket.one"] = 1
-    domain_usage["hyronleadmarketing.one"] = 1
+    domain_usage["hyronleadmarketing.one"] = 3
     domain_usage["hyronleadsconsult.one"] = 1
     domain_usage["hyronleadmasters.one"] = 1
     domain_usage["hyronleadhub.one"] = 2
     domain_usage["hyronleadprime.one"] = 1
     domain_usage["hyronleadsmasters.com"] = 1
+    domain_usage["hyronleadmaster.one"] = 3
+    domain_usage["hyronleadslab.one"] = 1
+    domain_usage["hyronleadsgroup.one"] = 2
+    domain_usage["hyronleadsgrowth.one"] = 1
+    domain_usage["hyronleadconsult.one"] = 2
+    domain_usage["hyronleadsexpert.one"] = 1
+    domain_usage["hyronleadinfo.one"] = 1
+    domain_usage["hyronleadsnetwork.one"] = 2
+    domain_usage["hyronleadsexpert.com"] = 2
+    domain_usage["hyronleadrising.one"] = 1
+    domain_usage["hyronleadpartner.com"] = 1
+    domain_usage["hyronleadonline.one"] = 3
+    domain_usage["hyronleadcloud.com"] = 1
+    domain_usage["hyronleadsolution.one"] = 1
+    domain_usage["hyronleadmarket.com"] = 2
+    domain_usage["hyronleadservices.one"] = 2
+    domain_usage["hyronleadspartners.com"] = 2
+    domain_usage["hyronleadhub.com"] = 1
+    domain_usage["hyronleadmedia.com"] = 1
+    domain_usage["hyronleadmasters.com"] = 1
+    domain_usage["hyronleadpartners.com"] = 1
+    domain_usage["hyronleadscloud.one"] = 1
+    domain_usage["hyronleadsgenius.one"] = 1
+    domain_usage["hyronleadmarket.one"] = 2
+    domain_usage["hyronleadsboost.one"] = 2
+    domain_usage["hyronleadspartner.one"] = 1
+    domain_usage["hyronleadpro.one"] = 1
+    domain_usage["hyronleaddigital.com"] = 1
+    domain_usage["hyronleadshub.com"] = 1
+    domain_usage["hyronleadservice.one"] = 1
+    domain_usage["hyronleadexperts.one"] = 1
+    domain_usage["hyronleadsclick.one"] = 1
+    domain_usage["hyronleadsconsulting.one"] = 1
+    domain_usage["hyronleadsmaster.one"] = 1
 
     for proxy in proxy_csv:
         available_domains = [domain for domain, count in domain_usage.items() if count < 5]
@@ -284,8 +389,8 @@ def main():
         used_emails.append(email)
         team_id = create_account(email, proxy)
         sleep_time = random.randint(280, 360)
-        time.sleep(sleep_time)
         print(f"Sleeping for {sleep_time} seconds...")
+        time.sleep(sleep_time)
 
         token = get_token(email, domain)
         print(token)
