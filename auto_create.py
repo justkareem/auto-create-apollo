@@ -185,10 +185,11 @@ def verify_account(proxy, token, name, email):
     verification_token_url = f"https://app.apollo.io/api/v1/password_resets/{token}"
     try:
         def make_request():
-            return requests.put(verification_token_url, headers=headers, data=data, proxies=proxies, timeout=10)
+            return requests.put(verification_token_url, headers=headers, json=data, proxies=proxies)
 
         response = retry_request(make_request)
         print(f"Email: {email} - Status Code: {response.status_code}")
+        print(response.text)
         set_cookies = response.headers.get('Set-Cookie', '')
         cookies = set_cookies.replace('\r\n', '; ') if set_cookies else ''
 
@@ -235,8 +236,44 @@ def generate_email(used_emails, domain):
 def main():
     proxy_csv = pd.read_csv("proxy.csv")["proxy"]
     domains = domain_csv["domain"]
-    used_emails = []
+    used_emails = ["Zael@hyronleadsagency.one", "Eason@hyronleadsolutions.one", "Gilberto@hyronleadsnet.com", "Charlie@hyronagency.one", "Greysen@hyronleadspro.com", "Howard@hyronleadsmarketing.one", "Primrose@hyronleadpros.one", "Josey@hyronleadspartner.com", "Anais@hyronleadnet.com", "Haziel@hyronleadboost.com", "Kaizer@hyronleadpros.com", "Khaza@hyronleadpartner.one", "Atlas@hyronleadsmarketing.com", "Levon@hyronleadnet.com", "Matheo@hyronleadsclick.com", "Mileena@hyronleads.one", "Carolyn@hyronleadservice.com", "Storm@hyronleaddigital.one", "Beaux@hyronleadsolution.com", "Craig@hyronleadconsulting.one", "Issac@hyronleadflow.one", "Jacobo@hyronleadspartners.one", "Nasir@hyronleadnetwork.one", "Karen@hyronleadsmarketing.one", "Amiyah@hyronleadspecialist.one", "Lesly@hyronleadgen.one", "Cy@hyronleadgen.one", "Trevon@hyronleaddigital.one", "Adira@hyronleadconnect.one", "Kanaan@hyronleadsmarketing.one", "Xaiden@hyronleadrise.one", "Shalom@hyronleadsgenius.com", "Eyden@hyronleadmaster.com", "Taryn@hyronleadsmarket.one", "Blakelyn@hyronleadmarketing.one", "Carolina@hyronleadsconsult.one", "Aliana@hyronleadsolutions.one", "Eithan@hyronleadmasters.one", "Denver@hyronleadhub.one", "Kashmere@hyronleadhub.one", "Jaycob@hyronleadprime.one", "Emmeline@hyronleadsmasters.com"]
     domain_usage = {domain: 0 for domain in domains}
+    domain_usage["hyronleadsagency.one"] = 1
+    domain_usage["hyronleadsolutions.one"] = 2
+    domain_usage["hyronleadsnet.com"] = 1
+    domain_usage["hyronagency.one"] = 1
+    domain_usage["hyronleadspro.com"] = 1
+    domain_usage["hyronleadsmarketing.one"] = 3
+    domain_usage["hyronleadpros.one"] = 1
+    domain_usage["hyronleadspartner.com"] = 1
+    domain_usage["hyronleadnet.com"] = 2
+    domain_usage["hyronleadboost.com"] = 1
+    domain_usage["hyronleadpros.com"] = 1
+    domain_usage["hyronleadpartner.one"] = 1
+    domain_usage["hyronleadsmarketing.com"] = 1
+    domain_usage["hyronleadsclick.com"] = 1
+    domain_usage["hyronleadsclick.com"] = 1
+    domain_usage["hyronleads.one"] = 1
+    domain_usage["hyronleadservice.com"] = 1
+    domain_usage["hyronleaddigital.one"] = 2
+    domain_usage["hyronleadsolution.com"] = 1
+    domain_usage["hyronleadconsulting.one"] = 1
+    domain_usage["hyronleadflow.one"] = 1
+    domain_usage["hyronleadspartners.one"] = 1
+    domain_usage["hyronleadnetwork.one"] = 1
+    domain_usage["hyronleadspecialist.one"] = 1
+    domain_usage["hyronleadgen.one"] = 2
+    domain_usage["hyronleadconnect.one"] = 1
+    domain_usage["hyronleadrise.one"] = 1
+    domain_usage["hyronleadsgenius.com"] = 1
+    domain_usage["hyronleadmaster.com"] = 1
+    domain_usage["hyronleadsmarket.one"] = 1
+    domain_usage["hyronleadmarketing.one"] = 1
+    domain_usage["hyronleadsconsult.one"] = 1
+    domain_usage["hyronleadmasters.one"] = 1
+    domain_usage["hyronleadhub.one"] = 2
+    domain_usage["hyronleadprime.one"] = 1
+    domain_usage["hyronleadsmasters.com"] = 1
 
     for proxy in proxy_csv:
         available_domains = [domain for domain, count in domain_usage.items() if count < 5]
@@ -250,6 +287,7 @@ def main():
         time.sleep(random.randint(280, 360))
 
         token = get_token(email, domain)
+        print(token)
         csrf, cookies = verify_account(proxy, token, name, email)
         proxy_ip, proxy_port = proxy.split('@')[-1].split(':')
         row = {
