@@ -252,7 +252,6 @@ def main():
     domain_usage["hyronleadpartner.one"] = 1
     domain_usage["hyronleadsmarketing.com"] = 1
     domain_usage["hyronleadsclick.com"] = 1
-    domain_usage["hyronleadsclick.com"] = 1
     domain_usage["hyronleads.one"] = 1
     domain_usage["hyronleadservice.com"] = 1
     domain_usage["hyronleaddigital.one"] = 2
@@ -262,10 +261,10 @@ def main():
     domain_usage["hyronleadspartners.one"] = 1
     domain_usage["hyronleadnetwork.one"] = 1
     domain_usage["hyronleadspecialist.one"] = 1
-    domain_usage["hyronleadgen.one"] = 2
+    domain_usage["hyronleadgen.one"] = 4
     domain_usage["hyronleadconnect.one"] = 1
     domain_usage["hyronleadrise.one"] = 1
-    domain_usage["hyronleadsgenius.com"] = 1
+    domain_usage["hyronleadsgenius.com"] = 2
     domain_usage["hyronleadmaster.com"] = 1
     domain_usage["hyronleadsmarket.one"] = 1
     domain_usage["hyronleadmarketing.one"] = 1
@@ -284,7 +283,9 @@ def main():
         name, email = generate_email(used_emails, domain)
         used_emails.append(email)
         team_id = create_account(email, proxy)
-        time.sleep(random.randint(280, 360))
+        sleep_time = random.randint(280, 360)
+        time.sleep(sleep_time)
+        print(f"Sleeping for {sleep_time} seconds...")
 
         token = get_token(email, domain)
         print(token)
